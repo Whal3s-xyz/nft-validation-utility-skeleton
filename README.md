@@ -1,70 +1,133 @@
-# Getting Started with Create React App
+# Prerequisites
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Clone the skeleton project from git and navigate into it and install JavaScript dependencies.
+````shell
+git clone git@github.com:Whal3s-xyz/nft-validation-utility-skeleton.git
+cd nft-validation-utility-skeleton
+npm install
+````
 
-## Available Scripts
+If you are familiar with node scripts head ofter to [Get started section](#getting-started)
+
+# Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+## `npm start`
 
-Runs the app in the development mode.\
+Runs the app in the development mode.
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The page will reload when you make changes.
+You may also see any lint errors in the console
 
-### `npm test`
+## `npm test`
 
-Launches the test runner in the interactive watch mode.\
+Launches the test runner in the interactive watch mode.
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+## `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the app for production to the `build` folder.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Getting started
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Follow the steps and build your own utility dApp.
 
-### `npm run eject`
+### Install whal3s.js
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```shell
+npm i @whal3s/whal3s.js
+````
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Insert Utility ID
+Insert your Utility ID (you copied from Whal3s App) into [NftValidationUtility.jsx:15](src%2Fcomponents%2FNftValidationUtility.jsx)
+````javascript
+const id = '[YOUR-UTILITY-ID]';
+````
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Create Whal3s object
+Create Whal3s object in [NftValidationUtility.jsx:24](src%2Fcomponents%2FNftValidationUtility.jsx)
+```javascript
+const whal3s = new Whal3s();
+```
 
-## Learn More
+### Create Validation Utility Instance
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Create Validation Utility Instance in [NftValidationUtility.jsx:29](src%2Fcomponents%2FNftValidationUtility.jsx)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+````javascript
+ whal3s.createValidationUtility(id).then((newUtility) => {
+    newUtility.addEventListener('stepChanged', (step) => {
+        setStep(step.detail.step)
+    })
+    setUtility(newUtility)
+    setStep(newUtility.step)
+})
+````
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Let users connect their wallet
 
-### Analyzing the Bundle Size
+Call `utility.connectWallet()` when the Connect-Wallet-Button in [1_ConnectWallet.jsx:10](src%2Fcomponents%2FNftValidationUtility%2F1_ConnectWallet.jsx) is clicked.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+````javascript
+<Button onClick={() => utility.connectWallet()}>Connect Wallet</Button>
+````
 
-### Making a Progressive Web App
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Let users select one of their eligible NFTs
 
-### Advanced Configuration
+We already prepared an example visualization of all eligable NFTs.
+You just need to set the token ID that should be used.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+[3_SelectNft.jsx:25](src%2Fcomponents%2FNftValidationUtility%2F3_SelectNft.jsx)
+````javascript
+if(nft.valid)
+    utility.tokenId = e.target.value
+````
 
-### Deployment
+### Reserve usage spot
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+In this example we make use of the reservation feature. This is optional but can be used to block this usage spot while asking for additional data like shipping address.
+To do so, call if the Button in [3_SelectNft.jsx:57](src%2Fcomponents%2FNftValidationUtility%2F3_SelectNft.jsx) is clicked.
 
-### `npm run build` fails to minify
+````javascript
+ utility.reserveEngagement()
+````
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Claim utility
+
+As already mentioned, we can add additional metadata to an engagement. This makes it possible to ship a completely serverless dApp.
+In this example ([4_ClaimNft.jsx:29](src%2Fcomponents%2FNftValidationUtility%2F4_ClaimNft.jsx)) we only ask for a text input you can exchange it for name and email for example.
+Finally you need to persist the claim. To do so, call `storeEngagement` on your utility object.
+````javascript
+ utility.storeEngagement({additionalData: additionalData})
+````
+
+
+### Finished
+
+Now head over to [Whal3s App](https://app.whal3s.xyz)  and check ne freshly created engagement.
+## Tips and tricks
+
+
+
+### Account Center
+
+You can customize the Wallet Configuration, like account center position, by passing a Configuration during Whal3s initialization.
+
+````javascript
+const whal3s = new Whal3s({
+    accountCenter: {
+        desktop: {
+            position: 'bottomRight', // position the account center to bottom right
+        },
+    }
+});
+````
+
+# Learn More
+
+You can learn more in the [Whal3s documentation](https://docs.whal3s.xyz).
